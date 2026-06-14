@@ -1,0 +1,265 @@
+\documentclass[12pt, a4paper]{article}
+
+\usepackage[margin=1in]{geometry}  % Clean, standard margins
+\usepackage{amsmath, amssymb, amsthm, mathtools} % Core math engines
+\usepackage{bm}                    % Superior bold math (for vectors/matrices)
+\usepackage{enumitem}              % Better list spacing
+
+% --- Custom Math Macros for ML ---
+% Probability & Stats
+\newcommand{\R}{\mathbb{R}}        % Real numbers
+\newcommand{\E}{\mathbb{E}}        % Expected value
+\newcommand{\Var}{\text{Var}}      % Variance
+\newcommand{\Cov}{\text{Cov}}      % Covariance
+
+% Vectors, Matrices & Tensors (Bolded)
+\newcommand{\bx}{\bm{x}}           % Input vector
+\newcommand{\by}{\bm{y}}           % Output vector
+\newcommand{\bw}{\bm{w}}           % Weight vector
+\newcommand{\btheta}{\bm{\theta}}  % Parameter vector
+
+% Operations
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\newcommand{\T}{\mathsf{T}}                      % Transpose (usage: \bx^\T)
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert} % Norm (usage: \norm{\bx})
+\newcommand{\pd}[2]{\frac{\partial #1}{\partial #2}} % Partial derivative
+
+\newenvironment{problem}[1][Problem]{\noindent\textbf{#1:}\par\vspace{0.5em}}{\vspace{1em}}
+\newenvironment{solution}{\noindent\textit{Solution.}\par\vspace{0.5em}}{\vspace{2em}}
+
+\usepackage{hyperref}
+
+\title{Chapter 5 - Vector Calculus}
+\author{\href{https://github.com/coolcmyk}{author: github.com/coolcmyk}}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{problem}[Exercise 5.1]
+  Compute the derivative $f'(x)$ for \\
+  \[
+  f(x) = log(x^4)sin(x^3)
+  \]
+\end{problem}
+
+\begin{solution}
+recall the product rule, which is
+  \[
+    \frac{d}{dx}[f(x)g(x)] = f(x)g'(x) + f'(x)g(x)
+  \]
+  with $f(x)$ as $log(x^4)$ and $g(x)$ as $sin(x^3)$
+
+  \vspace{0.5em}
+
+  we can get something like this
+
+  \[
+    \frac{d}{dx}[f(x)] = [log(x^4)\frac{d}{dx}[sin(x^3)]] + [\frac{d}{dx}[log(x^4)]sin(x^3)]
+  \]
+
+  \vspace{0.5em}
+
+  then we can define each $\frac{d}{dx}$s by applying chain rule
+  \[\frac{d}{dx}[sin(x^3)] = 3x^2cos(x^3)\]
+
+  \[\frac{d}{dx}[log(x^4)] = \frac{1}{x^4}[4x^3]\]
+  \[\frac{d}{dx}[log(x^4)] = \frac{4}{x}\]
+
+  well, we can finally get our final solution:
+  \[
+    f'(x) = 3x^2cos(x^3)log(x^4) + \frac{4}{x}sin(x^3)
+  \]
+\end{solution}
+
+
+
+\newpage
+
+
+\begin{problem}[Exercise 5.2]
+  Compute the derivative $f'(x)$ of the logistic sigmoid
+  \[
+    f(x) = \frac{1}{1 + \exp(-x)}.
+  \]
+\end{problem}
+
+\begin{solution}
+  we can write it as
+
+  \[f(x) = [1 + \exp(-x)]^{-1}\]
+  
+  let $u(x) = [1 + \exp(-x)]$
+
+  \vspace{0.5em}
+
+  \[ \frac{d}{dx}[f(x)] = \frac{d}{dx}[u(x)]^{-1}\]
+  \[ \frac{d}{dx}[f(x)] = -1 * u(x)^{-2} * u'(x)\]
+  
+  refer to the sum rule, we get $u'(x) = -1 * \exp(-x)$
+
+  \vspace{0.5em}
+  
+  then we can substitute back to the chain rule we defined above
+
+  \[\frac{d}{dx}[f(x)] = -1 * [1 + \exp(-x)]^{-2} * -1 * \exp(-x)\]
+  \[\frac{d}{dx}[f(x)] = [1 + \exp(-x)]^{-2} * \exp(-x)\]
+  
+  here we get the final answer of the derivative of sigmoid func
+
+  \[f'(x) = \frac{\exp(-x)}{[1 + \exp(-x)]^2}\]
+
+  also the fun part of this thing is we can evaluate that
+
+  \[\sigma(x) = \frac{1}{1 + \exp(-x)}.\]
+  \[1 - \sigma(x) = 1- \frac{1}{1 + \exp(-x)}.\]
+  \[1 - \sigma(x) = \frac{exp(-x)}{1 + \exp(-x)}.\]
+
+  which means we can do this
+
+  \[\sigma(x) * (1 - \sigma(x)) = \frac{1}{1 + \exp(-x)} * \frac{exp(-x)}{1 + \exp(-x)} \]
+
+  \[ f'(x) = \sigma(x) * (1 - \sigma(x)) = \frac{\exp(-x)}{[1 + \exp(-x)]^2} \]
+
+  we can actually use this identity as some kind of 'fast path' in backpropagation in the low-level machine learning calculation, so that we dont have to calculate the sigmoid func multiple times, we can just initiate it once,
+  then we should definitely use the identity for computation efficiency.
+
+\end{solution}
+\newpage
+
+
+\begin{problem}[Exercise 5.3]
+  Compute the derivative $f'(x)$ of the function
+  \[
+    f(x) = \exp\left(-\frac{1}{2\sigma^2}(x - \mu)^2\right),
+  \]
+  where $\mu, \sigma \in \R$ are constants.
+\end{problem}
+
+\begin{solution}
+  welp, from here we can just rinse and repeat our progress before, as usual, refer to the chain rule
+
+  let \[u(x) = -\frac{1}{2\sigma^2}(x - \mu)^2 \]
+  means that
+  \[ \frac{d}{dx}[f(x)] = exp(u(x))\frac{d}{dx}[u(x)]\]
+  we can conclude
+   \[\frac{d}{dx}[u(x)] = -\frac{(x-\mu)}{\sigma^{2}}\]
+  finally, lemon squeezy
+  \[ f'(x) = -\frac{(x-\mu)}{\sigma^{2}}exp(-\frac{1}{2\sigma^2}(x - \mu)^2)\]
+
+\end{solution}
+\newpage
+
+% \begin{problem}[Exercise 5.4]
+%   Compute the Taylor polynomials $T_n, n = 0, \dots, 5$ of $f(x) = \sin(x) + \cos(x)$ at $x_0 = 0$.
+% \end{problem}
+%
+% \begin{solution}
+%   % Your solution here
+% \end{solution}
+%
+% \newpage
+
+\begin{problem}[Exercise 5.5]
+  Consider the following functions:
+  \begin{align*}
+    f_1(\bx) &= \sin(x_1)\cos(x_2) \,, \quad \bx \in \R^2 \\
+    f_2(\bx, \by) &= \bx^\T \by \,, \quad \bx, \by \in \R^n \\
+    f_3(\bx) &= \bx\bx^\T \,, \quad \bx \in \R^n
+  \end{align*}
+  \begin{enumerate}[label=\alph*.]
+    \item What are the dimensions of $\frac{\partial f_i}{\partial \bx}$?
+    \item Compute the Jacobians.
+  \end{enumerate}
+\end{problem}
+
+\begin{solution}
+  we can simply comprehend jacobians as like a way to measure what kind of output that we will get out of a certain equation, imagine that pytorch / tensorflow is just
+  an optimized engine to calculate the chain rule (while updating its own weights in backprop), those chain rules are just jacobian matrices multiplication, it's just matmul all the way to the down :)
+\end{solution}
+\newpage
+
+\begin{problem}[Exercise 5.6]
+  Differentiate $f$ with respect to $t$ and $g$ with respect to $X$, where
+  \begin{align*}
+    f(t) &= \sin(\log(t^\T t)) \,, \quad t \in \R^D \\
+    g(X) &= \text{tr}(AXB) \,, \quad A \in \R^{D \times E}, X \in \R^{E \times F}, B \in \R^{F \times D} \,,
+  \end{align*}
+  where $\text{tr}(\cdot)$ denotes the trace.
+\end{problem}
+
+\begin{solution}
+
+\end{solution}
+\newpage
+
+\begin{problem}[Exercise 5.7]
+  Compute the derivatives $df/d\bx$ of the following functions by using the chain rule. Provide the dimensions of every single partial derivative. Describe your steps in detail.
+  \begin{enumerate}[label=\alph*.]
+    \item 
+    \[
+      f(z) = \log(1+z) \,, \quad z = \bx^\T \bx \,, \quad \bx \in \R^D
+    \]
+    \item 
+    \[
+      f(z) = \sin(z) \,, \quad z = A\bx + b \,, \quad A \in \R^{E \times D}, \bx \in \R^D, b \in \R^E
+    \]
+    where $\sin(\cdot)$ is applied to every element of $z$.
+  \end{enumerate}
+\end{problem}
+
+\begin{solution}
+  % Your solution here
+\end{solution}
+\newpage
+
+\begin{problem}[Exercise 5.8]
+  Compute the derivatives $df/d\bx$ of the following functions. Describe your steps in detail.
+  \begin{enumerate}[label=\alph*.]
+    \item Use the chain rule. Provide the dimensions of every single partial derivative.
+    \begin{align*}
+      f(z) &= \exp(-\frac{1}{2}z) \\
+      z &= g(\by) = \by^\T S^{-1} \by \\
+      \by &= h(\bx) = \bx - \mu
+    \end{align*}
+    where $\bx, \mu \in \R^D$, $S \in \R^{D \times D}$.
+    
+    \item 
+    \[
+      f(\bx) = \text{tr}(\bx\bx^\T + \sigma^2 I) \,, \quad \bx \in \R^D
+    \]
+    Here $\text{tr}(A)$ is the trace of $A$, i.e., the sum of the diagonal elements $A_{ii}$. \\
+    \textit{Hint: Explicitly write out the outer product.}
+    
+    \item Use the chain rule. Provide the dimensions of every single partial derivative. You do not need to compute the product of the partial derivatives explicitly.
+    \begin{align*}
+      f &= \tanh(z) \in \R^M \\
+      z &= A\bx + b \,, \quad \bx \in \R^N, A \in \R^{M \times N}, b \in \R^M.
+    \end{align*}
+    Here, $\tanh$ is applied to every component of $z$.
+  \end{enumerate}
+\end{problem}
+
+\begin{solution}
+  % Your solution here
+\end{solution}
+\newpage
+
+\begin{problem}[Exercise 5.9]
+  We define
+  \begin{align*}
+    g(\bx, z, \nu) &:= \log p(\bx, z) - \log q(z, \nu) \\
+    z &:= t(\epsilon, \nu)
+  \end{align*}
+  for differentiable functions $p, q, t$ and $\bx \in \R^D, z \in \R^E, \nu \in \R^F, \epsilon \in \R^G$. By using the chain rule, compute the gradient
+  \[
+    \frac{d}{d\nu} g(\bx, z, \nu).
+  \]
+\end{problem}
+
+\begin{solution}
+  % Your solution here
+\end{solution}
+
+\end{document}
