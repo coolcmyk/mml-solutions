@@ -19,7 +19,7 @@ cargo install techtonic watchexec
 npm install -g browser-sync
 ```
 
-## edit & run tex
+## edit & run tex (chapter-5 in this case)
 
 ### term 1 (watcher & renderer)
 ```
@@ -32,3 +32,5 @@ watchexec -w chapter-5 -e tex -- ./build.sh chapter-5/main.tex
 ```
 browser-sync start --server chapter-5 --files "chapter-5/main.pdf"
 ```
+
+happy learning! u can use nvim or vanilla vs-code, or your preferred IDEs to continue.

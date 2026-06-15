@@ -177,6 +177,56 @@ recall the product rule, which is
 \begin{solution}
   we can simply comprehend jacobians as like a way to measure what kind of output that we will get out of a certain equation, imagine that pytorch / tensorflow is just
   an optimized engine to calculate the chain rule (while updating its own weights in backprop), those chain rules are just jacobian matrices multiplication, it's just matmul all the way to the down :)
+
+
+  well the first thing we need to consider in order to determine the dimensions of these $\frac{\partial f}{\partial \bx}$ is to look at the input dimensions of x, the product of equations and combine them \\
+
+  \textbf{case $f_1$}: \\
+  we can see that it takes $x_1$ and $x_2$ or just simply look at the notation $\quad \bx \in \R^2$, well basically it means the same thing
+
+  yea so we can deduct the result to be some kind of row matrix (1 x 2) matrix
+
+  so what about the jacobian?
+
+  just do partial differential on the equation
+  
+  \[ f_1(\bx) = \sin(x_1)\cos(x_2) \,, \quad \bx \in \R^2 \]
+
+  \[\frac{\partial f_1}{\partial x_1} = \cos(x_1)\cos(x_2)\]
+  \[\frac{\partial f_1}{\partial x_2} = -\sin(x_1)\sin(x_2)\]
+
+  we can conclude that the jacobian is \\
+  \[ [\cos(x_1)\cos(x_2), -\sin(x_1)\sin(x_2)] \]
+
+
+  \textbf{case $f_2$}: \\
+
+  rinse and repeat: \\
+  \[f_2(\bx, \by) = \bx^\T \by \,, \quad \bx, \by \in \R^n \]
+
+  \[f_2(\bx, \by) = \bx^\T \by = x_1y_1 + x_2y_2 + \dots + x_ny_n \,, \quad \bx, \by \in \R^n \]
+
+  taking the partial derivative with respect to any single component $x_i$, treating $y_i$ as a constant: \\
+  \[ \frac{\partial f_2}{\partial x_i} = y_i \]
+
+  we can conclude that the Jacobian is a $1 \times n$ row vector: \\
+  \[ \left[ \frac{\partial f_2}{\partial x_1}, \frac{\partial f_2}{\partial x_2}, \dots, \frac{\partial f_2}{\partial x_n} \right] = [y_1, y_2, \dots, y_n] = \by^\T \]
+
+
+  \textbf{case $f_3$}: \\
+
+  here, multiplying an $n \times 1$ vector by a $1 \times n$ vector outputs an $n \times n$ matrix: \\
+  \[ f_3(\bx) = \bx\bx^\T \,, \quad \bx \in \R^n \]
+
+  let's look at a single element of this resulting matrix at row $i$ and column $j$, which is simply $x_i x_j$. We take the partial derivative of this element with respect to an input variable $x_k$ using the product rule: \\
+  \[ \frac{\partial (x_i x_j)}{\partial x_k} = \frac{\partial x_i}{\partial x_k}x_j + x_i\frac{\partial x_j}{\partial x_k} \]
+
+  using the Kronecker delta ($\delta_{ik} = 1$ if $i=k$, and $0$ otherwise) to represent the derivatives of the individual variables: \\
+  \[ \frac{\partial (x_i x_j)}{\partial x_k} = \delta_{ik}x_j + x_i\delta_{jk} \]
+
+  we can conclude that the Jacobian forms an $n \times n \times n$ 3D tensor, where each element is defined as: \\
+  \[ (J_3)_{i,j,k} = \delta_{ik}x_j + x_i\delta_{jk} \]
+
 \end{solution}
 \newpage
 
